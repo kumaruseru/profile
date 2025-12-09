@@ -7,21 +7,67 @@ import {
   useRouteError,
   isRouteErrorResponse,
   Link,
+  useLocation,
 } from "@remix-run/react";
 import { ThemeProvider } from "~/contexts/ThemeContext";
 import { LanguageProvider } from "~/contexts/LanguageContext";
 import styles from "~/styles/global.css?url";
 import { Home, RefreshCcw, AlertTriangle } from "lucide-react";
-import { motion } from "framer-motion";
-import { useEffect, useState, Suspense, lazy } from "react";
+import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import { useEffect, useState, Suspense, lazy, useRef } from "react";
+import Lenis from "lenis";
 
-// Lazy load component 3D để tối ưu hiệu suất tải trang ban đầu
+// Lazy load component 3D (giữ nguyên từ bước trước)
 const SpaceScene = lazy(() => import("~/components/canvas/SpaceScene"));
 
 export const links = () => [
   { rel: "stylesheet", href: styles },
   { rel: "icon", href: "/favicon.ico" },
 ];
+
+// --- COMPONENT: SMOOTH SCROLL WRAPPER ---
+// Thiết lập Lenis để cuộn trang mượt như lụa
+function SmoothScroll({ children }) {
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2, // Thời gian trượt
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Hàm vật lý
+      smoothWheel: true,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
+  return <>{children}</>;
+}
+
+// --- COMPONENT: SCROLL PROGRESS BAR ---
+// Thanh tiến trình chạy ngang trên đầu trang
+function ProgressBar() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 origin-left z-[9999]"
+      style={{ scaleX }}
+    />
+  );
+}
 
 export function Layout({ children }) {
   return (
@@ -33,7 +79,11 @@ export function Layout({ children }) {
         <Links />
       </head>
       <body>
-        {children}
+        {/* Bọc toàn bộ app trong SmoothScroll */}
+        <SmoothScroll>
+          <ProgressBar />
+          {children}
+        </SmoothScroll>
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -42,17 +92,30 @@ export function Layout({ children }) {
 }
 
 export default function App() {
+  const location = useLocation(); // Lấy thông tin trang hiện tại để làm key cho animation
+
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <Outlet />
+        {/* AnimatePresence giúp tạo hiệu ứng khi component Outlet thay đổi (chuyển trang) */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname} // Key thay đổi -> kích hoạt animation
+            initial={{ opacity: 0, y: 20 }} // Trạng thái bắt đầu: mờ và thấp hơn 20px
+            animate={{ opacity: 1, y: 0 }}  // Trạng thái kết thúc: rõ và về vị trí gốc
+            exit={{ opacity: 0, y: -20 }}   // Trạng thái thoát: mờ và bay lên 20px
+            transition={{ duration: 0.5, ease: "easeOut" }} // Thời gian chuyển: 0.5s
+            className="w-full"
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </LanguageProvider>
     </ThemeProvider>
   );
 }
 
-// --- TRANG 404 NEXT-GEN: 3D WEBGL + MOTION ---
-
+// --- GIỮ NGUYÊN PHẦN ERROR BOUNDARY (TRANG 404 3D) ---
 export function ErrorBoundary() {
   const error = useRouteError();
   const is404 = isRouteErrorResponse(error) && error.status === 404;
@@ -65,26 +128,19 @@ export function ErrorBoundary() {
   return (
     <Layout>
       <div className="relative min-h-screen w-full bg-black text-white overflow-hidden flex flex-col items-center justify-center">
-        
-        {/* --- LỚP 1: 3D BACKGROUND (React Three Fiber) --- */}
-        {/* Chỉ render ở client để tránh lỗi SSR */}
         {mounted && (
           <Suspense fallback={<div className="absolute inset-0 bg-slate-900" />}>
             <SpaceScene />
           </Suspense>
         )}
 
-        {/* --- LỚP 2: GLASSMORPHISM UI (Framer Motion) --- */}
         <motion.div 
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative z-10 w-full max-w-3xl px-6"
         >
-          {/* Thẻ kính mờ */}
           <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-[2rem] p-8 md:p-12 shadow-2xl shadow-purple-500/20 text-center overflow-hidden relative">
-            
-            {/* Hiệu ứng ánh sáng quét qua thẻ (Sheen effect) */}
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-150%] animate-[shimmer_5s_infinite]" />
 
             <motion.div
@@ -113,7 +169,6 @@ export function ErrorBoundary() {
                   : "Có vẻ như động cơ phản lực của chúng tôi đang gặp trục trặc kỹ thuật."}
               </p>
 
-              {/* Debug info (ẩn đi, chỉ hiện khi cần thiết) */}
               {!is404 && (
                 <div className="mb-8 p-4 bg-red-950/30 border border-red-500/30 rounded-lg text-left text-xs font-mono text-red-300 overflow-auto max-h-32">
                   <div className="flex items-center gap-2 mb-2 font-bold text-red-400">
@@ -133,7 +188,6 @@ export function ErrorBoundary() {
                     <span className="relative z-10 flex items-center gap-2">
                       <Home size={20} /> Quay Về Trạm Chính
                     </span>
-                    {/* Hiệu ứng nền nút */}
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </motion.button>
                 </Link>
