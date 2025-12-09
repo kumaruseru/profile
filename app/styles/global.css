@@ -9,7 +9,7 @@
   button, 
   nav, 
   footer,
-  .min-h-screen, /* Ẩn container chính của web */
+  /* .min-h-screen, <--- ĐÃ XÓA DÒNG NÀY ĐỂ KHÔNG ẨN CONTAINER CHÍNH */
   .fixed,        /* Ẩn các hiệu ứng nền fixed */
   [class*="shadow-"], /* Tắt đổ bóng */
   [class*="bg-grid-"] /* Tắt hình nền lưới */
@@ -39,7 +39,7 @@
 
   /* 3. Thiết lập khổ giấy A4 */
   @page {
-    margin: 1cm; /* Căn lề 1cm (chuẩnn) */
+    margin: 1cm; /* Căn lề 1cm (chuẩn) */
     size: A4;
   }
 
