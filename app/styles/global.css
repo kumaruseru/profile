@@ -2,16 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --- CẤU HÌNH IN ẤN (HARVARD CV) --- */
 @media print {
-  .no-print { 
-    display: none; 
+  /* 1. Ẩn toàn bộ giao diện Website */
+  .no-print, 
+  button, 
+  nav, 
+  footer,
+  .min-h-screen, /* Ẩn container chính của web */
+  .fixed,        /* Ẩn các hiệu ứng nền fixed */
+  [class*="shadow-"], /* Tắt đổ bóng */
+  [class*="bg-grid-"] /* Tắt hình nền lưới */
+  { 
+    display: none !important; 
+    background: white !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
   }
-  body { 
-    background: white; 
-    color: black; 
+
+  /* 2. Reset Body về trang giấy trắng */
+  body, html { 
+    background-color: white !important; 
+    color: black !important; 
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    font-size: 11pt !important;
+    line-height: 1.3 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 3. Thiết lập khổ giấy A4 */
+  @page {
+    margin: 1cm; /* Căn lề 1cm (chuẩnn) */
+    size: A4;
+  }
+
+  /* 4. Hiển thị & Định dạng CV Harvard */
+  .harvard-cv {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    font-family: "Times New Roman", Times, serif !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Đảm bảo mọi text trong CV đều màu đen */
+  .harvard-cv * {
+    color: black !important;
+    border-color: black !important;
+  }
+  
+  /* Reset lại các thẻ heading/paragraph để không bị ảnh hưởng bởi Tailwind base */
+  .harvard-cv h1, .harvard-cv h2, .harvard-cv h3 {
+    margin-top: 0;
+    line-height: 1.2;
   }
 }
 
+/* --- CÁC STYLE TÙY CHỈNH CỦA WEBSITE (GIỮ NGUYÊN) --- */
+
+/* Tùy chỉnh thanh cuộn (Scrollbar) */
 ::-webkit-scrollbar { 
   width: 8px; 
 }
@@ -29,6 +86,7 @@
   background: #334155; 
 }
 
+/* Nền lưới (Grid Background) */
 .bg-grid-slate-100 { 
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='%23f1f5f9'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e"); 
 }
