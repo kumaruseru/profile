@@ -7,6 +7,7 @@ import { ExperienceCard } from "~/components/sections/ExperienceCard";
 import { EducationCard } from "~/components/sections/EducationCard";
 import { OpenToWorkCard } from "~/components/sections/OpenToWorkCard";
 import { ProjectShowcase } from "~/components/sections/ProjectShowcase";
+import { ContactCard } from "~/components/sections/ContactCard"; // <-- Import mới
 
 export const meta = () => {
   return [
@@ -35,6 +36,8 @@ export default function Index() {
           <EducationCard />
           <OpenToWorkCard />
           <ProjectShowcase />
+          {/* Thêm ContactCard vào đây */}
+          <ContactCard />
         </main>
 
         <footer className="text-center text-slate-400 text-sm pb-8">

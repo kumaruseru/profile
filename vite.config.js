@@ -21,7 +21,4 @@ export default defineConfig({
       "~": path.resolve(__dirname, "./app"),
     },
   },
-  server: {
-    allowedHosts: ["devserver-master--inspiring-lamington-2c2b30.netlify.app"],
-  },
 });

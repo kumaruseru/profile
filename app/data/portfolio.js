@@ -46,7 +46,16 @@ export const DATA_VI = {
     copy: "Sao chép",
     copied: "Đã chép!",
     frontend: "Giao diện",
-    backend: "Hệ thống"
+    backend: "Hệ thống",
+    // Thêm phần này
+    contact: "Liên hệ",
+    contactName: "Tên của bạn",
+    contactEmail: "Email",
+    contactMessage: "Lời nhắn",
+    send: "Gửi tin nhắn",
+    sending: "Đang gửi...",
+    sent: "Đã gửi thành công!",
+    error: "Có lỗi xảy ra!"
   }
 };
 
@@ -99,7 +108,16 @@ export const DATA_EN = {
     copy: "Copy",
     copied: "Copied!",
     frontend: "Frontend",
-    backend: "Backend"
+    backend: "Backend",
+    // Thêm phần này
+    contact: "Contact Me",
+    contactName: "Your Name",
+    contactEmail: "Email Address",
+    contactMessage: "Message",
+    send: "Send Message",
+    sending: "Sending...",
+    sent: "Message Sent!",
+    error: "Something went wrong!"
   }
 };
 
@@ -108,4 +126,3 @@ export const SKILLS_COMMON = {
   backend: ["C# / .NET Core", "Node.js", "Python", "MongoDB"],
   tools: ["Git", "Docker", "Figma", "VS Code"],
 };
-  
