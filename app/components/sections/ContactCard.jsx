@@ -15,7 +15,7 @@ export const ContactCard = () => {
     const formData = new FormData(e.target);
     
     try {
-      await fetch('/', {
+      await fetch('/form.html', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(formData).toString(),
