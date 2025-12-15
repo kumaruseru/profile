@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Terminal, ArrowUpRight, FileText, Sparkles } from 'lucide-react';
+import { Mail, MessageCircle, Terminal, ArrowUpRight, Sparkles } from 'lucide-react'; // Đổi Phone -> MessageCircle
 import { Card } from '../ui/Card'; 
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Typewriter } from 'react-simple-typewriter';
@@ -34,7 +34,7 @@ export const ProfileSection = () => {
                 
                 {/* Online/Status Indicator */}
                 <div className="absolute -bottom-2 -right-2 bg-white dark:bg-slate-900 p-1.5 rounded-full ring-1 ring-slate-100 dark:ring-slate-800 shadow-sm z-20">
-                     <span className="relative flex h-3.5 w-3.5">
+                      <span className="relative flex h-3.5 w-3.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
                     </span>
@@ -93,19 +93,22 @@ export const ProfileSection = () => {
                 <ArrowUpRight size={18} className="text-slate-300 dark:text-slate-600 group-hover/card:text-blue-500 transition-colors transform group-hover/card:translate-x-1 group-hover/card:-translate-y-1" />
             </a>
 
-            {/* Phone Action */}
+            {/* Zalo Action */}
             <a 
-                href={`tel:${data.profile.phone}`}
-                className="group/card flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 hover:border-emerald-200 dark:hover:border-emerald-500/30 transition-all duration-300"
+                href={`https://zalo.me/${data.profile.phone.replace(/[^0-9]/g, '')}`} // Link Zalo chuẩn, xóa ký tự lạ khỏi SĐT
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/card flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:border-blue-400 dark:hover:border-blue-500/30 transition-all duration-300"
             >
-                <div className="p-3 bg-white dark:bg-slate-700/50 text-emerald-500 dark:text-emerald-400 rounded-xl shadow-sm group-hover/card:scale-110 group-hover/card:-rotate-3 transition-transform duration-300">
-                    <Phone size={20} />
+                <div className="p-3 bg-white dark:bg-slate-700/50 text-blue-500 dark:text-blue-400 rounded-xl shadow-sm group-hover/card:scale-110 group-hover/card:-rotate-3 transition-transform duration-300">
+                    {/* Dùng icon MessageCircle đại diện cho Chat/Zalo */}
+                    <MessageCircle size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Call Me</p>
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Chat Zalo</p>
                     <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{data.profile.phone}</p>
                 </div>
-                 <ArrowUpRight size={18} className="text-slate-300 dark:text-slate-600 group-hover/card:text-emerald-500 transition-colors transform group-hover/card:translate-x-1 group-hover/card:-translate-y-1" />
+                 <ArrowUpRight size={18} className="text-slate-300 dark:text-slate-600 group-hover/card:text-blue-500 transition-colors transform group-hover/card:translate-x-1 group-hover/card:-translate-y-1" />
             </a>
         </div>
       </div>

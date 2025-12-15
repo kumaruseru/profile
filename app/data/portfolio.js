@@ -18,8 +18,7 @@ export const DATA_VI = {
       degree: "Cử nhân CNTT",
       gpa: "7.5/10",
       period: "2021 - Hiện tại",
-      major: "Kỹ thuật phần mềm", // <--- Thêm dòng này
-      honors: "Sinh viên giỏi"
+      major: "Kỹ thuật phần mềm"
     }
   ],
   experience: [
@@ -190,7 +189,8 @@ export const portfolioData = {
   social: {
     github: "https://github.com/33nghia2001",
     linkedin: "https://linkedin.com/in/nghiaht2810",
-    facebook: "https://www.facebook.com/nghiaht28102003"
+    facebook: "https://www.facebook.com/nghiaht28102003",
+    twitter: "https://twitter.com/nghiaht281003"
   },
   // --- THÊM LINK DONATE Ở ĐÂY ---
   donate: "https://buymeacoffee.com/nghiaht281003"

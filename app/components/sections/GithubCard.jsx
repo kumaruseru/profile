@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Github, Star, GitFork, Users, Book, ExternalLink, MapPin, Link as LinkIcon, Loader2, Trophy, Calendar, Facebook, Linkedin } from 'lucide-react'; // Import thêm icon
+import { 
+  Github, Star, GitFork, Book, ExternalLink, MapPin, 
+  Link as LinkIcon, Loader2, Trophy, Calendar, 
+  Facebook as FacebookIcon, Twitter, Linkedin
+} from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { portfolioData } from '../../data/portfolio';
@@ -7,23 +11,23 @@ import { portfolioData } from '../../data/portfolio';
 export const GithubCard = () => {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  
+  // State dữ liệu
   const [profile, setProfile] = useState(null);
   const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Lấy username từ data config
-  const username = portfolioData?.github?.username || portfolioData?.social?.github?.split('/').pop() || 'nghiaht2810';
+  // State riêng cho Calendar (Khởi tạo null để tránh lỗi render object)
+  const [CalendarComponent, setCalendarComponent] = useState(null);
+
+  const username = portfolioData?.github?.username || 'nghiaht2810';
 
   const texts = {
     en: {
       viewProfile: "View GitHub",
-      repositories: "Repositories",
-      followers: "Followers",
-      following: "Following",
       topRepos: "Top Repositories",
       noDescription: "No description provided",
-      loading: "Loading profile...",
       error: "Unable to load data",
       contributions: "Contributions",
       viewAll: "View all",
@@ -31,12 +35,8 @@ export const GithubCard = () => {
     },
     vi: {
       viewProfile: "Xem GitHub",
-      repositories: "Kho lưu trữ",
-      followers: "Người theo dõi",
-      following: "Đang theo dõi",
       topRepos: "Kho lưu trữ nổi bật",
       noDescription: "Chưa có mô tả",
-      loading: "Đang tải dữ liệu...",
       error: "Không thể tải dữ liệu",
       contributions: "Hoạt động đóng góp",
       viewAll: "Xem tất cả",
@@ -46,34 +46,54 @@ export const GithubCard = () => {
 
   const t = texts[language] || texts.en;
 
+  // 1. Effect tải dữ liệu từ GitHub API
   useEffect(() => {
     const fetchGithubData = async () => {
       try {
         setLoading(true);
-        // 1. Fetch Profile
-        const profileRes = await fetch(`https://api.github.com/users/${username}`);
-        if (!profileRes.ok) throw new Error('Failed to fetch profile');
-        const profileData = await profileRes.json();
-        setProfile(profileData);
+        const [profileRes, reposRes] = await Promise.all([
+            fetch(`https://api.github.com/users/${username}`),
+            fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10&type=owner`)
+        ]);
 
-        // 2. Fetch Repos
-        const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10&type=owner`);
-        if (!reposRes.ok) throw new Error('Failed to fetch repos');
+        if (!profileRes.ok || !reposRes.ok) throw new Error('GitHub API Error');
+
+        const profileData = await profileRes.json();
         const reposData = await reposRes.json();
         
-        // Sắp xếp theo star và lấy top 4
-        const sortedRepos = reposData.sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 4);
-        setRepos(sortedRepos);
+        setProfile(profileData);
+        setRepos(reposData.sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 4));
       } catch (err) {
-        console.error(err);
+        console.error("Github Fetch Error:", err);
         setError(true);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchGithubData();
+    if (username) fetchGithubData();
   }, [username]);
+
+  // 2. Effect tải thư viện Calendar AN TOÀN (Fix lỗi Element type invalid)
+  useEffect(() => {
+    const loadCalendar = async () => {
+        try {
+            const mod = await import('react-github-calendar');
+            // Cố gắng lấy Component chuẩn: ưu tiên default, sau đó là named export
+            const Comp = mod.default || mod.GitHubCalendar;
+            
+            // Chỉ set state nếu Comp là function hoặc object component hợp lệ
+            // (Tránh set nhầm Module Namespace Object gây crash)
+            if (Comp) {
+                setCalendarComponent(() => Comp);
+            }
+        } catch (err) {
+            console.warn("Failed to load GitHub Calendar library. Showing fallback.", err);
+            // Không làm gì cả, để UI tự hiện Skeleton
+        }
+    };
+    loadCalendar();
+  }, []);
 
   const getLanguageColor = (lang) => {
     const colors = {
@@ -84,23 +104,27 @@ export const GithubCard = () => {
     return colors[lang] || '#8b949e';
   };
 
-  // Helper function để format ngày
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'long', year: 'numeric' }).format(date);
+    return new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'long', year: 'numeric' }).format(new Date(dateString));
   };
 
-  // --- STATE: LOADING ---
+  const explicitTheme = {
+    light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
+    dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
+  };
+
+  // --- LOADING UI ---
   if (loading) {
     return (
-      <div className="col-span-1 md:col-span-2 flex items-center justify-center p-12 min-h-[400px] bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border border-gray-100 dark:border-gray-800 rounded-2xl">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      <div className="col-span-1 md:col-span-2 flex flex-col items-center justify-center p-12 min-h-[400px] bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl animate-pulse">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-2" />
+        <span className="text-xs text-gray-400">Syncing with GitHub...</span>
       </div>
     );
   }
 
-  // --- STATE: ERROR ---
+  // --- ERROR UI ---
   if (error || !profile) {
       return (
         <div className="col-span-1 md:col-span-2 p-8 text-center text-red-500 border border-red-100 rounded-2xl bg-white dark:bg-gray-900">
@@ -113,12 +137,8 @@ export const GithubCard = () => {
     <div className="col-span-1 md:col-span-2 group overflow-hidden border border-gray-200/60 dark:border-gray-800/60 bg-white dark:bg-[#0d1117] shadow-lg hover:shadow-xl transition-all duration-500 rounded-2xl">
       <div className="flex flex-col lg:flex-row h-full">
         
-        {/* ================================================================================== */}
-        {/* CỘT TRÁI: PROFILE INFO (Fixed Width ~280px) */}
-        {/* ================================================================================== */}
+        {/* --- LEFT COLUMN --- */}
         <div className="w-full lg:w-[280px] shrink-0 bg-gradient-to-b from-gray-50/80 to-white dark:from-[#161b22] dark:to-[#0d1117] border-b lg:border-b-0 lg:border-r border-gray-200/60 dark:border-gray-800 p-6 flex flex-col relative z-10">
-          
-          {/* Avatar & Name */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="relative group/avatar mb-4">
               <div className="absolute -inset-1 bg-gradient-to-tr from-blue-500 to-green-500 rounded-full opacity-40 group-hover/avatar:opacity-80 blur transition duration-500"></div>
@@ -134,7 +154,6 @@ export const GithubCard = () => {
             </a>
           </div>
 
-          {/* Stats Grid */}
           <div className="grid grid-cols-3 divide-x divide-gray-200 dark:divide-gray-700 border-y border-gray-200 dark:border-gray-800 py-4 mb-6">
             <div className="flex flex-col items-center px-1">
                 <span className="font-bold text-gray-900 dark:text-white">{profile.public_repos}</span>
@@ -150,17 +169,13 @@ export const GithubCard = () => {
             </div>
           </div>
 
-          {/* Location, Join Date & Socials */}
           <div className="space-y-3 flex-grow text-sm text-gray-600 dark:text-gray-400">
-             {/* Location */}
-             {profile.location && (
+              {profile.location && (
                 <div className="flex items-center justify-center lg:justify-start gap-2">
                   <MapPin size={14} className="shrink-0 text-gray-400" />
                   <span className="truncate">{profile.location}</span>
                 </div>
               )}
-              
-              {/* Blog / Website */}
               {profile.blog && (
                 <div className="flex items-center justify-center lg:justify-start gap-2">
                   <LinkIcon size={14} className="shrink-0 text-gray-400" />
@@ -169,28 +184,27 @@ export const GithubCard = () => {
                   </a>
                 </div>
               )}
-
-              {/* Joined Date (Mới thêm) */}
               <div className="flex items-center justify-center lg:justify-start gap-2">
                   <Calendar size={14} className="shrink-0 text-gray-400" />
                   <span>{t.joined} {formatDate(profile.created_at)}</span>
               </div>
-
-              {/* Social Links (Mới thêm - Lấy từ portfolioData) */}
               <div className="flex items-center justify-center lg:justify-start gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                  {portfolioData.social?.linkedin && (
+                  {portfolioData?.social?.linkedin && (
                       <a href={portfolioData.social.linkedin} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0077b5] transition-colors">
                           <Linkedin size={18} />
                       </a>
                   )}
-                  {portfolioData.social?.facebook && (
+                  {portfolioData?.social?.facebook && (
                       <a href={portfolioData.social.facebook} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#1877f2] transition-colors">
-                          <Facebook size={18} />
+                          <FacebookIcon size={18} />
                       </a>
                   )}
-                  {/* Bạn có thể thêm các icon khác ở đây nếu muốn */}
+                  {portfolioData?.social?.twitter && (
+                      <a href={portfolioData.social.twitter} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#1da1f2] transition-colors">
+                          <Twitter size={18} />
+                      </a>
+                  )}
               </div>
-                  
           </div>
 
           <a href={profile.html_url} target="_blank" rel="noopener noreferrer" className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black rounded-xl transition-all shadow-lg hover:shadow-xl font-bold text-xs uppercase tracking-wider">
@@ -198,30 +212,46 @@ export const GithubCard = () => {
           </a>
         </div>
 
-        {/* ================================================================================== */}
-        {/* CỘT PHẢI: CONTENT DASHBOARD (Flexible Width) */}
-        {/* ================================================================================== */}
+        {/* --- RIGHT COLUMN --- */}
         <div className="flex-1 flex flex-col bg-white dark:bg-[#0d1117] p-5 lg:p-6 overflow-hidden min-w-0">
           
-          {/* 1. CONTRIBUTIONS GRAPH */}
+          {/* === CONTRIBUTIONS GRAPH === */}
           <div className="mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">
                     <Trophy size={14} className="text-green-500" /> {t.contributions}
                 </h3>
+                <span className="text-[10px] text-gray-400">Last Year</span>
             </div>
-            <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
-                 {/* Thêm ?t=... để tránh cache ảnh cũ */}
-                 <img 
-                    src={`https://ghchart.rshah.org/${theme === 'dark' ? '2ea043' : '216e39'}/${username}?t=${new Date().getTime()}`} 
-                    alt="Github Contributions" 
-                    className="h-24 min-w-[600px] w-full object-cover rounded opacity-85 hover:opacity-100 transition-opacity"
-                 />
+            
+            <div className="flex justify-center lg:justify-start w-full overflow-x-auto scrollbar-thin py-2">
+                 {/* Chỉ render khi CalendarComponent đã tải xong, nếu không hiện Skeleton */}
+                 {CalendarComponent ? (
+                      <CalendarComponent 
+                          username={username}
+                          colorScheme={theme === 'dark' ? 'dark' : 'light'}
+                          theme={explicitTheme}
+                          fontSize={11}
+                          blockSize={11}
+                          blockMargin={4}
+                          labels={{
+                              totalCount: '{{count}} contributions in the last year',
+                          }}
+                          style={{
+                              color: theme === 'dark' ? '#c9d1d9' : '#24292f',
+                              maxWidth: '100%'
+                          }}
+                      />
+                 ) : (
+                    // Skeleton UI khi đang tải thư viện (Tránh lỗi object render)
+                    <div className="h-[100px] w-full bg-gray-100 dark:bg-[#161b22] animate-pulse rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-700">
+                        <span className="text-xs text-gray-400 font-mono">Loading chart...</span>
+                    </div>
+                 )}
             </div>
-             <p className="text-[10px] text-gray-400 mt-1 text-right italic">*Chart updates may delay up to 24h</p>
           </div>
 
-          {/* 2. TOP REPOSITORIES (LIST VIEW - 1 Column) */}
+          {/* Repo List */}
           <div className="flex-grow flex flex-col min-w-0">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -232,7 +262,6 @@ export const GithubCard = () => {
                 </a>
             </div>
             
-            {/* GRID 1 CỘT - Đảm bảo không bao giờ bị tràn chữ */}
             <div className="grid grid-cols-1 gap-3">
               {repos.map((repo) => (
                 <a 
@@ -242,7 +271,6 @@ export const GithubCard = () => {
                   rel="noopener noreferrer"
                   className="group flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-[#161b22]/40 hover:bg-white dark:hover:bg-[#161b22] hover:border-blue-500/30 dark:hover:border-blue-400/30 transition-all duration-300 gap-3"
                 >
-                  {/* Left Side: Name + Desc */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                         <Book size={15} className="text-gray-400 group-hover:text-blue-500 transition-colors shrink-0" />
@@ -251,11 +279,10 @@ export const GithubCard = () => {
                         </span>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate pl-6 opacity-80">
-                         {repo.description || <span className="italic opacity-50">{t.noDescription}</span>}
+                          {repo.description || <span className="italic opacity-50">{t.noDescription}</span>}
                     </p>
                   </div>
 
-                  {/* Right Side: Stats */}
                   <div className="flex items-center gap-3 sm:gap-4 pl-6 sm:pl-0 text-[11px] shrink-0">
                         {repo.language && (
                             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-medium">
