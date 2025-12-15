@@ -5,7 +5,7 @@ export const DATA_VI = {
     name: "Hoàng Trọng Nghĩa",
     role: "Full Stack Developer",
     email: "nghiaht281003@gmail.com",
-    phone: "+84-336783780",
+    phone: "+84-888 037 360",
     location: "Gò Vấp, TP.HCM",
     addressFull: "108/8 Nguyễn Thái Sơn, Gò Vấp, TP.HCM",
     summary: "Lập trình viên chuyên về C#, .NET, Python, Node.js và React. Có kinh nghiệm xây dựng các ứng dụng web thực tế phục vụ hơn 50 người dùng. Đam mê tối ưu hóa hiệu suất và nâng cao trải nghiệm người dùng.",
@@ -30,12 +30,15 @@ export const DATA_VI = {
   ],
   projects: [
     {
-      name: "Project Cowl",
+      name: "Owls",
       role: "Lead Developer",
-      period: "01/2024 - 02/2024",
-      tech: ["C#", ".NET", "MongoDB", "WinUI 3"],
-      desc: "Hệ thống quản lý thông tin khách hàng doanh nghiệp. Giảm 30% thời gian triển khai.",
-      highlight: true
+      period: "12/2025 - 02/2026",
+      tech: ["Python", "Django", "Nextjs", "React", "Tailwind CSS"],
+      desc: "Một nền tảng thương mại điện tử đa nhà cung cấp hiện đại, an toàn và có khả năng mở rộng cao, kết nối hiệu quả người bán và người mua.",
+      highlight: true,
+      // --- CÁC TRƯỜNG MỚI CHO NÚT BẤM ---
+      sourceUrl: "https://github.com/33nghia2001/owls", // Link source code
+      demoUrl: "https://owls.asia" // Link live demo
     }
   ],
   labels: {
@@ -91,12 +94,15 @@ export const DATA_EN = {
   ],
   projects: [
     {
-      name: "Project Cowl",
+      name: "Owls",
       role: "Lead Developer",
-      period: "01/2024 - 02/2024",
-      tech: ["C#", ".NET", "MongoDB", "WinUI 3"],
-      desc: "Enterprise customer info management system. Reduced deployment time by 30-40%.",
-      highlight: true
+      period: "12/2025 - 02/2026",
+      tech: ["Python", "Django", "Nextjs", "React", "Tailwind CSS"],
+      desc: "A modern, secure, and highly scalable multi-vendor e-commerce platform that effectively connects sellers and buyers.",
+      highlight: true,
+      // --- NEW FIELDS FOR BUTTONS ---
+      sourceUrl: "https://github.com/33nghia2001/owls", // Source code link
+      demoUrl: "https://owls.asia" // Live demo link
     }
   ],
   labels: {
@@ -127,17 +133,15 @@ export const SKILLS_COMMON = {
   tools: ["Git", "Docker", "Figma", "VS Code"],
 };
 
-// --- QUAN TRỌNG: Thêm export này để sửa lỗi import ở GithubCard và LocationCard ---
 export const portfolioData = {
-  ...DATA_EN, // Sử dụng dữ liệu tiếng Anh làm mặc định
+  ...DATA_EN,
   skills: SKILLS_COMMON,
-  // Thêm các trường social/github mà GithubCard.jsx yêu cầu
   github: {
-    username: "nghiaht2810" 
+    username: "33nghia2001" 
   },
   social: {
-    github: "https://github.com/nghiaht2810",
+    github: "https://github.com/33nghia2001",
     linkedin: "https://linkedin.com/in/nghiaht2810",
-    facebook: "https://facebook.com/nghiaht2810"
+    facebook: "https://www.facebook.com/nghiaht28102003"
   }
 };

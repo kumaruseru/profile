@@ -37,6 +37,7 @@ export const ProjectShowcase = () => {
 
                 <h3 className="text-2xl md:text-3xl font-bold mb-4 text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2 cursor-pointer">
                   {project.name}
+                  {/* Icon mũi tên chỉ hiện khi hover */}
                   <ArrowUpRight size={22} className="opacity-0 -translate-y-1 translate-x-1 group-hover:opacity-100 group-hover:translate-y-0 group-hover:translate-x-0 transition-all duration-300" />
                 </h3>
                 
@@ -53,16 +54,33 @@ export const ProjectShowcase = () => {
                   ))}
                 </div>
 
-                {/* Optional Actions (Mock) */}
+                {/* --- Action Buttons (Source Code & Live Demo) --- */}
                 <div className="flex items-center gap-4 pt-2">
-                    <button className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 transition-colors">
-                        <Github size={18} />
+                    {/* Source Code Button */}
+                    <a 
+                      href={project.sourceUrl || "#"} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-2 transition-colors group/btn"
+                    >
+                        <div className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 group-hover/btn:bg-slate-200 dark:group-hover/btn:bg-slate-700 transition-colors">
+                          <Github size={18} />
+                        </div>
                         <span>Source Code</span>
-                    </button>
-                    <button className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-2 transition-colors">
-                        <ExternalLink size={18} />
+                    </a>
+
+                    {/* Live Demo Button */}
+                    <a 
+                      href={project.demoUrl || "#"} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-2 transition-colors group/btn"
+                    >
+                        <div className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 group-hover/btn:bg-blue-50 dark:group-hover/btn:bg-blue-900/30 transition-colors">
+                          <ExternalLink size={18} />
+                        </div>
                         <span>Live Demo</span>
-                    </button>
+                    </a>
                 </div>
               </div>
               

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Github, Star, GitFork, Users, Book, ExternalLink, MapPin, Link as LinkIcon, Loader2, Trophy, Calendar } from 'lucide-react';
+import { Github, Star, GitFork, Users, Book, ExternalLink, MapPin, Link as LinkIcon, Loader2, Trophy, Calendar, Facebook, Linkedin } from 'lucide-react'; // Import thêm icon
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { portfolioData } from '../../data/portfolio';
@@ -26,7 +26,8 @@ export const GithubCard = () => {
       loading: "Loading profile...",
       error: "Unable to load data",
       contributions: "Contributions",
-      viewAll: "View all"
+      viewAll: "View all",
+      joined: "Joined"
     },
     vi: {
       viewProfile: "Xem GitHub",
@@ -38,7 +39,8 @@ export const GithubCard = () => {
       loading: "Đang tải dữ liệu...",
       error: "Không thể tải dữ liệu",
       contributions: "Hoạt động đóng góp",
-      viewAll: "Xem tất cả"
+      viewAll: "Xem tất cả",
+      joined: "Tham gia"
     }
   };
 
@@ -80,6 +82,13 @@ export const GithubCard = () => {
       Vue: '#41b883', React: '#61dafb', Dart: '#00B4AB', Swift: '#ffac45', Go: '#00ADD8',
     };
     return colors[lang] || '#8b949e';
+  };
+
+  // Helper function để format ngày
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'long', year: 'numeric' }).format(date);
   };
 
   // --- STATE: LOADING ---
@@ -141,14 +150,17 @@ export const GithubCard = () => {
             </div>
           </div>
 
-          {/* Location & Blog */}
+          {/* Location, Join Date & Socials */}
           <div className="space-y-3 flex-grow text-sm text-gray-600 dark:text-gray-400">
+             {/* Location */}
              {profile.location && (
                 <div className="flex items-center justify-center lg:justify-start gap-2">
                   <MapPin size={14} className="shrink-0 text-gray-400" />
                   <span className="truncate">{profile.location}</span>
                 </div>
               )}
+              
+              {/* Blog / Website */}
               {profile.blog && (
                 <div className="flex items-center justify-center lg:justify-start gap-2">
                   <LinkIcon size={14} className="shrink-0 text-gray-400" />
@@ -157,6 +169,28 @@ export const GithubCard = () => {
                   </a>
                 </div>
               )}
+
+              {/* Joined Date (Mới thêm) */}
+              <div className="flex items-center justify-center lg:justify-start gap-2">
+                  <Calendar size={14} className="shrink-0 text-gray-400" />
+                  <span>{t.joined} {formatDate(profile.created_at)}</span>
+              </div>
+
+              {/* Social Links (Mới thêm - Lấy từ portfolioData) */}
+              <div className="flex items-center justify-center lg:justify-start gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  {portfolioData.social?.linkedin && (
+                      <a href={portfolioData.social.linkedin} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#0077b5] transition-colors">
+                          <Linkedin size={18} />
+                      </a>
+                  )}
+                  {portfolioData.social?.facebook && (
+                      <a href={portfolioData.social.facebook} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#1877f2] transition-colors">
+                          <Facebook size={18} />
+                      </a>
+                  )}
+                  {/* Bạn có thể thêm các icon khác ở đây nếu muốn */}
+              </div>
+                  
           </div>
 
           <a href={profile.html_url} target="_blank" rel="noopener noreferrer" className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black rounded-xl transition-all shadow-lg hover:shadow-xl font-bold text-xs uppercase tracking-wider">
@@ -173,7 +207,7 @@ export const GithubCard = () => {
           <div className="mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                    <Calendar size={14} className="text-green-500" /> {t.contributions}
+                    <Trophy size={14} className="text-green-500" /> {t.contributions}
                 </h3>
             </div>
             <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
