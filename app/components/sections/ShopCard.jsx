@@ -3,8 +3,7 @@ import { Globe, ArrowUpRight, ShoppingBag, Sparkles } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-// QUAN TRỌNG: Giữ tên là ExperienceCard để _index.jsx không bị lỗi import
-export const ExperienceCard = () => {
+export const ShopCard = () => {
   const { data } = useLanguage();
   
   // Kiểm tra an toàn dữ liệu
@@ -29,7 +28,7 @@ export const ExperienceCard = () => {
             <h2 className="text-2xl font-black text-white leading-tight tracking-tight">
               {data.labels.domainsTitle || "Tên miền"} <br />
               <span className="text-slate-400">
-                {data.labels.domainsAction || "đang bán"}
+                {data.labels.domainsAction || "Mua tên miền số chất lượng cao"}
               </span>
             </h2>
           </div>

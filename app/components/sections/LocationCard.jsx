@@ -10,11 +10,16 @@ export const LocationCard = () => {
   const { theme } = useTheme();
   const [time, setTime] = useState('');
 
-  // Lấy địa điểm từ portfolioData hoặc dùng giá trị mặc định
-  const location = portfolioData?.profile?.location || "Ho Chi Minh City, Vietnam";
+  // Cập nhật text hiển thị địa chỉ mới
+  const location = "Hẻm 108 Nguyễn Thái Sơn, Gò Vấp, TP.HCM";
   
-  // URL Google Maps Embed
-  const mapUrl = "https://maps.google.com/maps?q=108%2F8%20Nguy%E1%BB%85n%20Th%C3%A1i%20S%C6%A1n%2C%20G%C3%B2%20V%E1%BA%A5p%2C%20H%E1%BB%93%20Ch%C3%AD%20Minh&t=&z=16&ie=UTF8&iwloc=&output=embed";
+  // Link Embed Google Maps chính xác cho địa chỉ 108 Nguyễn Thái Sơn
+  // z=16: Zoom vừa đủ để thấy tên đường và hẻm
+  // iwloc=near: Ẩn popup trắng (thông tin địa điểm) để map sạch sẽ (xóa map nhỏ)
+  const mapUrl = "https://maps.google.com/maps?q=108%20Nguy%E1%BB%85n%20Th%C3%A1i%20S%C6%A1n%2C%20Ph%C6%B0%E1%BB%9Dng%203%2C%20G%C3%B2%20V%E1%BA%A5p%2C%20H%E1%BB%93%20Ch%C3%AD%20Minh&t=&z=16&ie=UTF8&iwloc=near&output=embed";
+
+  // Link mở tab mới
+  const googleMapsLink = "https://www.google.com/maps/search/?api=1&query=108+Nguyễn+Thái+Sơn,+Phường+3,+Gò+Vấp,+Hồ+Chí+Minh";
 
   const texts = {
     en: {
@@ -34,7 +39,6 @@ export const LocationCard = () => {
   const t = texts[language] || texts.en;
 
   useEffect(() => {
-    // Cập nhật đồng hồ theo múi giờ Việt Nam
     const updateTime = () => {
       const now = new Date();
       const options = { 
@@ -46,7 +50,6 @@ export const LocationCard = () => {
       setTime(now.toLocaleTimeString('en-US', options));
     };
     updateTime();
-
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -57,17 +60,19 @@ export const LocationCard = () => {
       {/* Map Background */}
       <div className="absolute inset-0 w-full h-full">
         <div className="absolute inset-0 bg-slate-200 dark:bg-slate-800 animate-pulse z-0" /> 
+        
         <iframe 
           width="100%" 
           height="100%" 
           title="map"
           src={mapUrl}
-          className="absolute inset-0 w-full h-full border-0 opacity-80 group-hover:opacity-100 transition-all duration-700 grayscale hover:grayscale-0 dark:invert-[0.85] dark:hue-rotate-180 dark:contrast-125 dark:hover:invert-[0.85] dark:hover:grayscale-0"
+          className="absolute inset-0 w-full h-full border-0 opacity-80 group-hover:opacity-100 transition-all duration-700 grayscale hover:grayscale-0 dark:invert-[0.9] dark:hue-rotate-180 dark:contrast-125 dark:hover:invert-[0.9] dark:hover:grayscale-0"
           allowFullScreen
           loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
         ></iframe>
         
-        {/* Gradient Overlay for better text readability */}
+        {/* Overlay gradient */}
         <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 dark:opacity-80 transition-opacity duration-300" />
       </div>
 
@@ -87,7 +92,7 @@ export const LocationCard = () => {
             {/* Location Badge */}
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                     <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1">
                         <div className="p-1.5 bg-red-500/20 rounded-full">
                             <MapPin size={16} className="text-red-500 fill-red-500/20" />
                         </div>
@@ -101,10 +106,10 @@ export const LocationCard = () => {
                 </div>
             </div>
 
-            {/* Action Buttons - Slide up on hover */}
+            {/* Action Buttons */}
             <div className="flex items-center gap-3 pt-2 opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
                 <a 
-                    href="https://maps.google.com/maps?q=108%2F8%20Nguy%E1%BB%85n%20Th%C3%A1i%20S%C6%A1n%2C%20G%C3%B2%20V%E1%BA%A5p%2C%20H%E1%BB%93%20Ch%C3%AD%20Minh" 
+                    href={googleMapsLink} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-lg"
@@ -113,7 +118,7 @@ export const LocationCard = () => {
                     {t.getDirections}
                 </a>
                 <a 
-                    href="https://maps.google.com/maps?q=108%2F8%20Nguy%E1%BB%85n%20Th%C3%A1i%20S%C6%A1n%2C%20G%C3%B2%20V%E1%BA%A5p%2C%20H%E1%BB%93%20Ch%C3%AD%20Minh" 
+                    href={googleMapsLink}
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center justify-center w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-lg border border-white/10 transition-colors"

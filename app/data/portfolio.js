@@ -34,7 +34,7 @@ export const DATA_VI = {
     {
       name: "owls.digital",
       tagline: "Agency & Tech Startup",
-      price: "Thương lượng",
+      price: "Liên Hệ",
       status: "Premium",
       description: "Tên miền hoàn hảo cho các Digital Agency, công ty công nghệ hoặc Portfolio sáng tạo. Ngắn gọn, dễ nhớ và chuyên nghiệp.",
       features: ["u/owls", "Digital Ext", "Brandable"]
