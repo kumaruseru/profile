@@ -39,14 +39,19 @@ export default function Index() {
 
         {/* Ẩn toàn bộ giao diện Web Portfolio khi in */}
         <main className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-min pb-12 print:hidden">
+          {/* Row 1 & 2 */}
           <ProfileSection />
           <LocationCard />
-          <GithubCard />
-          <TechStack />
           <ExperienceCard />
+          <TechStack />
+          
+          {/* Row 3 */}
+          <GithubCard />
+          <ProjectShowcase />
+          
+          {/* Row 4 */}
           <EducationCard />
           <OpenToWorkCard />
-          <ProjectShowcase />
           <ContactCard />
         </main>
 
