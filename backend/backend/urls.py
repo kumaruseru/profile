@@ -40,7 +40,7 @@ api_urlpatterns = [
 # === MAIN URL CONFIGURATION ===
 urlpatterns = [
     # Trang quản trị Django Admin
-    path('admin/', admin.site.urls),
+    path('nghia/', admin.site.urls),
     
     # Gom nhóm API dưới prefix /api/v1/
     path('api/v1/', include(api_urlpatterns)),
