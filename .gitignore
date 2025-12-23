@@ -1,11 +1,65 @@
-.cache
-build
-node_modules
+# Ignore environment files
 .env
-.DS_Store
-*.log
-public/build
-.remix
+.env.*
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+*.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Packaging
+dist/
+build/
+*.egg-info/
+
+# Tests
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node
+node_modules/
+
+# Caches
+.cache
+.mypy_cache/
+
+# Build outputs
+public/build
+
+# Remix / Netlify
+.remix
 # Local Netlify folder
 .netlify
+
+# Coverage
+coverage/
+
+# Misc
+public/build
