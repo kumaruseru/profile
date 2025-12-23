@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Send, CheckCircle, AlertCircle, User, Mail, 
   MessageSquare, Loader2, FileText 
@@ -16,18 +16,16 @@ interface ContactCardProps {
 export const ContactCard: React.FC<ContactCardProps> = ({ initialSubject = '' }) => {
   const { data } = useLanguage();
   const [status, setStatus] = useState<SubmitStatus>('idle');
+  
+  // Ref để điều khiển focus vào ô message
+  const messageRef = useRef<HTMLTextAreaElement>(null);
 
   // --- 2. Effect Auto-fill & Focus ---
   useEffect(() => {
-    if (initialSubject) {
-      const subjectInput = document.getElementById('subject') as HTMLInputElement;
-      if (subjectInput) {
-        subjectInput.value = initialSubject;
-        
-        // Focus vào ô message để nhập nội dung ngay
-        const messageInput = document.getElementById('message') as HTMLTextAreaElement;
-        if (messageInput) messageInput.focus();
-      }
+    // Nếu có initialSubject, nghĩa là người dùng vừa click "Contact me" từ đâu đó
+    // Chúng ta sẽ focus vào ô message để họ nhập nội dung luôn.
+    if (initialSubject && messageRef.current) {
+      messageRef.current.focus();
     }
   }, [initialSubject]);
 
@@ -130,6 +128,7 @@ export const ContactCard: React.FC<ContactCardProps> = ({ initialSubject = '' })
                 type="text"
                 name="subject"
                 id="subject"
+                defaultValue={initialSubject} // Sửa: Dùng defaultValue thay vì thao tác DOM
                 placeholder="Project Opportunity"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all hover:bg-white dark:hover:bg-slate-800"
               />
@@ -145,7 +144,15 @@ export const ContactCard: React.FC<ContactCardProps> = ({ initialSubject = '' })
               <div className="absolute top-3 left-3 text-slate-400 group-focus-within:text-blue-500 transition-colors">
                   <MessageSquare size={18} />
               </div>
-              <textarea required name="message" id="message" rows={4} placeholder="Tell me about your project..." className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none hover:bg-white dark:hover:bg-slate-800"></textarea>
+              <textarea 
+                ref={messageRef} // Sửa: Gắn ref để focus
+                required 
+                name="message" 
+                id="message" 
+                rows={4} 
+                placeholder="Tell me about your project..." 
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none hover:bg-white dark:hover:bg-slate-800"
+              ></textarea>
             </div>
           </div>
 

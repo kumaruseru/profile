@@ -1,6 +1,117 @@
-// app/data/portfolio.js
+// app/data/portfolio.ts
 
-export const DATA_VI = {
+// --- 1. Định nghĩa Types (Interfaces) ---
+
+export interface Profile {
+  name: string;
+  role: string;
+  email: string;
+  phone: string;
+  location: string;
+  addressFull: string;
+  summary: string;
+  cta: string;
+  availability: string;
+  avatarInitials?: string; // Optional vì bản VI không có field này trong data gốc
+}
+
+export interface Education {
+  school: string;
+  degree: string;
+  gpa: string;
+  period: string;
+  major?: string; // Optional
+}
+
+export interface Experience {
+  company: string;
+  role: string;
+  period: string;
+  description: string;
+}
+
+export interface Domain {
+  name: string;
+  tagline: string;
+  price: string;
+  status: string;
+  description: string;
+  features: string[];
+}
+
+export interface Project {
+  name: string;
+  role: string;
+  period: string;
+  tech: string[];
+  desc: string;
+  highlight: boolean;
+  sourceUrl: string;
+  demoUrl: string;
+}
+
+export interface Labels {
+  techStack: string;
+  experience: string;
+  education: string;
+  projects: string;
+  featured: string;
+  savePdf: string;
+  copy: string;
+  copied: string;
+  frontend: string;
+  backend: string;
+  contact: string;
+  contactName: string;
+  contactEmail: string;
+  contactMessage: string;
+  send: string;
+  sending: string;
+  sent: string;
+  error: string;
+  domainsTitle: string;
+  domainsSubtitle: string;
+  buyNow: string;
+  contactSubject?: string; // Thêm field này nếu dùng trong form
+  donateTitle: string;
+  donateDesc: string;
+}
+
+// Interface tổng cho dữ liệu ngôn ngữ
+export interface PortfolioContent {
+  profile: Profile;
+  education: Education[];
+  experience: Experience[];
+  domains: Domain[];
+  projects: Project[];
+  labels: Labels;
+}
+
+// Interface cho Skills
+export interface Skills {
+  frontend: string[];
+  backend: string[];
+  tools: string[];
+}
+
+// Interface cho toàn bộ data export
+export interface FullPortfolioData extends PortfolioContent {
+  skills: Skills;
+  github: {
+    username: string;
+  };
+  social: {
+    github: string;
+    linkedin: string;
+    facebook: string;
+    twitter: string;
+  };
+  donate: string;
+}
+
+// --- 2. Dữ liệu ---
+
+export const DATA_VI: PortfolioContent = {
   profile: {
     name: "Hoàng Trọng Nghĩa",
     role: "Full Stack Developer",
@@ -81,13 +192,12 @@ export const DATA_VI = {
     domainsTitle: "Tên miền đang bán",
     domainsSubtitle: "Tài sản số",
     buyNow: "Mua ngay",
-    // Thêm nhãn cho Donate
     donateTitle: "Donate",
     donateDesc: "Mời tôi ly cà phê"
   }
 };
 
-export const DATA_EN = {
+export const DATA_EN: PortfolioContent = {
   profile: {
     name: "Hoang Trong Nghia",
     role: "Full Stack Developer",
@@ -168,19 +278,19 @@ export const DATA_EN = {
     domainsTitle: "Domains For Sale",
     domainsSubtitle: "Digital Assets",
     buyNow: "Buy Now",
-    // New labels for Donate
     donateTitle: "Donate",
     donateDesc: "Buy me a coffee"
   }
 };
 
-export const SKILLS_COMMON = {
-  frontend: ["React.js", "Next.js", "Tailwind CSS", "Lavarel"],
+export const SKILLS_COMMON: Skills = {
+  // Sửa lỗi chính tả: Lavarel -> Laravel
+  frontend: ["React.js", "Next.js", "Tailwind CSS", "Laravel"],
   backend: ["C# / .NET Core", "Node.js", "Python", "MongoDB"],
   tools: ["Git", "Docker", "Figma", "VS Code"],
 };
 
-export const portfolioData = {
+export const portfolioData: FullPortfolioData = {
   ...DATA_EN,
   skills: SKILLS_COMMON,
   github: {
@@ -192,6 +302,5 @@ export const portfolioData = {
     facebook: "https://www.facebook.com/nghiaht28102003",
     twitter: "https://twitter.com/nghiaht281003"
   },
-  // --- THÊM LINK DONATE Ở ĐÂY ---
   donate: "https://buymeacoffee.com/nghiaht281003"
 };
