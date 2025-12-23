@@ -1,10 +1,8 @@
 import os
 import sys
 from pathlib import Path
-from datetime import timedelta
 import environ
 
-# === ENVIRONMENT SETUP ===
 env = environ.Env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / 'apps'))
@@ -18,11 +16,16 @@ DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localhost:3000"])
 
+# === CORS ===
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000", "http://127.0.0.1:3000"])
+CORS_ALLOW_CREDENTIALS = env.bool("CORS_ALLOW_CREDENTIALS", default=True)
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=DEBUG)
+
 ROOT_URLCONF = "backend.urls"
 WSGI_APPLICATION = "backend.wsgi.application"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# === APPS CONFIGURATION ===
+# === APPS ===
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -98,18 +101,16 @@ else:
         }
     }
 
-# === CLOUDFLARE R2 STORAGE ===
+# === CLOUDFLARE R2 STORAGE (Primary Storage) ===
 USE_S3 = env.bool("USE_S3", default=False)
 
 if USE_S3:
-    # 1. Credentials
     AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
     AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
     AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL")
     AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default=None)
     
-    # 2. Advanced Config
     AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="auto")
     AWS_S3_SIGNATURE_VERSION = env("AWS_S3_SIGNATURE_VERSION", default="s3v4")
     AWS_S3_FILE_OVERWRITE = env.bool("AWS_S3_FILE_OVERWRITE", default=False)
@@ -118,12 +119,10 @@ if USE_S3:
     _acl = env("AWS_DEFAULT_ACL", default=None)
     AWS_DEFAULT_ACL = None if _acl == 'None' or not _acl else _acl
 
-    # 3. URL CONFIGURATION (FIX LỖI IMPROPERLY CONFIGURED TẠI ĐÂY)
     if AWS_S3_CUSTOM_DOMAIN:
         STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
         MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
     else:
-        # Fallback nếu không có Custom Domain (Dùng endpoint của R2)
         STATIC_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/static/"
         MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/media/"
 
@@ -144,12 +143,28 @@ if USE_S3:
         },
     }
 else:
+    # Local Storage (Chỉ dùng khi dev và tắt S3)
     STATIC_URL = "/static/"
     MEDIA_URL = "/media/"
-    
-# Cấu hình folder lưu file tạm hoặc file tĩnh khi collectstatic
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# === FRONTEND INTEGRATION ===
+STATICFILES_DIRS = []
+LOCAL_STATIC_DIR = BASE_DIR / "static"
+if LOCAL_STATIC_DIR.exists():
+    STATICFILES_DIRS.append(LOCAL_STATIC_DIR)
+
+FRONTEND_DIR = BASE_DIR.parent / "public"
+FRONTEND_BUILD_DIR = FRONTEND_DIR / "build"
+
+if FRONTEND_BUILD_DIR.exists():
+    STATICFILES_DIRS.insert(0, FRONTEND_BUILD_DIR / "static")
+    try:
+        TEMPLATES[0]["DIRS"].insert(0, FRONTEND_BUILD_DIR)
+    except Exception:
+        pass
 
 # === REST FRAMEWORK ===
 REST_FRAMEWORK = {
