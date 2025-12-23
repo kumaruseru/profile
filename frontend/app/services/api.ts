@@ -20,11 +20,14 @@ export async function getPortfolioData() {
 
   const [config, profile, resume, projects] = await Promise.all(endpoints);
 
+  // DRF pagination returns { count, next, previous, results }
+  const projectsList = projects && Array.isArray(projects) ? projects : projects?.results || [];
+
   return {
     config,
     profile,
     resume,
-    projects,
+    projects: projectsList,
   };
 }
 
