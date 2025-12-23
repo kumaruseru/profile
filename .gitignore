@@ -35,8 +35,9 @@ Thumbs.db
 
 # Packaging
 dist/
-build/
 *.egg-info/
+build/
+!frontend/build/
 
 # Tests
 .coverage
