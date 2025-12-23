@@ -3,6 +3,7 @@ import { useLoaderData } from "react-router";
 import type { Route } from "./+types/projects";
 import { getProjects } from "~/services/api";
 import type { Project } from "~/types/api";
+import { marked } from "marked";
 
 // --- 1. Meta Tags (SEO) ---
 export function meta() {
@@ -15,8 +16,39 @@ export function meta() {
 // --- 2. Loader ---
 export async function loader() {
   const projects = await getProjects();
-  // Đảm bảo projects luôn là mảng
-  return { projects: Array.isArray(projects) ? projects : [] };
+  const list = Array.isArray(projects) ? projects : [];
+
+  // Enrich projects with GitHub README HTML when repo_url points to GitHub
+  const enriched = await Promise.all(
+    list.map(async (p: any) => {
+      try {
+        if (!p.repo_url || !p.repo_url.includes("github.com")) return p;
+        const url = new URL(p.repo_url);
+        const parts = url.pathname.replace(/(^\/+|\.git$)/g, "").split("/");
+        if (parts.length < 2) return p;
+        const owner = parts[0];
+        const repo = parts[1];
+
+        // 1. Get repo info to find default branch
+        const infoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+        if (!infoRes.ok) return p;
+        const info = await infoRes.json();
+        const branch = info.default_branch || "main";
+
+        // 2. Try to fetch README raw
+        const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/README.md`;
+        const readmeRes = await fetch(rawUrl);
+        if (!readmeRes.ok) return p;
+        const md = await readmeRes.text();
+        const html = marked.parse(md || "");
+        return { ...p, readme_html: html };
+      } catch (err) {
+        return p;
+      }
+    })
+  );
+
+  return { projects: enriched };
 }
 
 // --- 3. Component ---

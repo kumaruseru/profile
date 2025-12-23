@@ -1,72 +1,65 @@
-import type { PortfolioData } from "~/types/api";
+// Frontend API client
+const API_BASE = (import.meta.env.VITE_API_BASE as string) || "http://localhost:8000";
 
-const API_BASE_URL = "http://localhost:8000/api";
-
-// Helper function: Tự động xử lý response
-async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, options);
-  
+async function fetchJson(path: string, opts: RequestInit = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: { Accept: "application/json" },
+    credentials: "include",
+    ...opts,
+  });
   if (!res.ok) {
-    if (res.status === 404) {
-      throw new Response("Not Found", { status: 404 });
-    }
-    const errorText = await res.text();
-    throw new Error(`API Error ${res.status}: ${errorText}`);
+    const text = await res.text().catch(() => "");
+    throw new Error(`API ${path} failed: ${res.status} ${res.statusText} ${text}`);
   }
-  
-  const data = await res.json();
-
-  // --- QUAN TRỌNG: Tự động bóc tách dữ liệu phân trang ---
-  // Nếu API trả về object có chứa 'results' là array, ta chỉ lấy 'results'
-  if (data && typeof data === 'object' && 'results' in data && Array.isArray(data['results'])) {
-    return data['results'] as T;
+  const data = await res.json().catch(() => null);
+  // If DRF-style pagination, unwrap `results`
+  if (data && typeof data === "object" && "results" in data && Array.isArray((data as any).results)) {
+    return (data as any).results;
   }
-
-  return data as T;
+  return data;
 }
 
-// 1. Home Page & General Data
-export async function getPortfolioData(): Promise<PortfolioData> {
-  return fetchAPI<PortfolioData>("/portfolio/home/");
+export async function getPortfolioData() {
+  const [config, profile, resume, projects] = await Promise.all([
+    fetchJson("/api/config/"),
+    fetchJson("/api/profile/"),
+    fetchJson("/api/resume/"),
+    fetchJson("/api/projects/"),
+  ]);
+
+  const projectsList = projects && Array.isArray(projects) ? projects : projects?.results || [];
+
+  return { config, profile, resume, projects: projectsList };
 }
 
-// 2. Projects Page
 export async function getProjects() {
-  return fetchAPI<any[]>("/projects/");
+  const res = await fetchJson("/api/projects/");
+  return res && Array.isArray(res) ? res : res?.results || [];
 }
 
-// 3. Blog List Page
 export async function getPosts() {
-  return fetchAPI<any[]>("/blog/posts/");
+  const res = await fetchJson("/api/blog/posts/");
+  return res && Array.isArray(res) ? res : res?.results || [];
 }
 
-// 4. Blog Detail Page
 export async function getPostBySlug(slug: string) {
-  // Slug detail không bao giờ phân trang, nên trả về trực tiếp
-  return fetchAPI<any>(`/blog/posts/${slug}/`);
+  return fetchJson(`/api/blog/posts/${slug}/`);
 }
 
-// 5. Resume Page (Lấy từ API tổng hợp Home cho đồng bộ)
 export async function getResume() {
-  // Mẹo: Dùng lại dữ liệu resume từ API Home để đảm bảo đầy đủ cấu trúc
   const data = await getPortfolioData();
   return data.resume;
 }
 
-// 6. Contact Page
-export async function sendContactMessage(data: Record<string, any>) {
-  const res = await fetch(`${API_BASE_URL}/contact/`, {
+export async function sendContactMessage(payload: Record<string, any>) {
+  const res = await fetch(`${API_BASE}/api/contact/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    credentials: "include",
   });
-
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.detail || JSON.stringify(errorData) || "Không thể gửi tin nhắn");
-  }
-
+  if (!res.ok) throw new Error("Failed to send contact");
   return res.json();
 }
+
+export default { getPortfolioData, getProjects, getPosts, getPostBySlug, getResume, sendContactMessage };
