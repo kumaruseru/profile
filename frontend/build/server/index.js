@@ -4,6 +4,7 @@ import { createReadableStreamFromReadable } from "@react-router/node";
 import { ServerRouter, UNSAFE_withComponentProps, Outlet, UNSAFE_withErrorBoundaryProps, isRouteErrorResponse, Meta, Links, ScrollRestoration, Scripts, useLoaderData } from "react-router";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+import { useState } from "react";
 const streamTimeout = 5e3;
 function handleRequest(request, responseStatusCode, responseHeaders, routerContext, loadContext) {
   if (request.method.toUpperCase() === "HEAD") {
@@ -133,13 +134,22 @@ async function getPortfolioData() {
     fetchJson("/api/v1/resume/"),
     fetchJson("/api/v1/projects/")
   ];
-  const [config, profile, resume, projects] = await Promise.all(endpoints);
+  const [config, profile, resume, projects2] = await Promise.all(endpoints);
   return {
     config,
     profile,
     resume,
-    projects
+    projects: projects2
   };
+}
+async function postContact(formData) {
+  const res = await fetch(`${API_BASE}/api/v1/contact/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(formData)
+  });
+  if (!res.ok) throw new Error("Failed to send contact");
+  return res.json();
 }
 function meta({
   data
@@ -151,7 +161,7 @@ function meta({
     content: data?.profile?.headline || "Welcome to my portfolio"
   }];
 }
-async function loader() {
+async function loader$1() {
   const data = await getPortfolioData();
   return data;
 }
@@ -160,7 +170,7 @@ const home = UNSAFE_withComponentProps(function Home() {
     config,
     profile,
     resume,
-    projects
+    projects: projects2
   } = useLoaderData();
   if (!profile) {
     return /* @__PURE__ */ jsxs("div", {
@@ -238,7 +248,7 @@ const home = UNSAFE_withComponentProps(function Home() {
           children: "Dự án nổi bật"
         }), /* @__PURE__ */ jsx("div", {
           className: "grid md:grid-cols-2 gap-6",
-          children: projects?.map((project) => /* @__PURE__ */ jsxs("div", {
+          children: projects2?.map((project) => /* @__PURE__ */ jsxs("div", {
             className: "border rounded-xl overflow-hidden hover:shadow-lg transition group",
             children: [project.thumbnail && /* @__PURE__ */ jsx("div", {
               className: "h-48 overflow-hidden",
@@ -293,10 +303,151 @@ const home = UNSAFE_withComponentProps(function Home() {
 const route1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   default: home,
-  loader,
+  loader: loader$1,
   meta
 }, Symbol.toStringTag, { value: "Module" }));
-const serverManifest = { "entry": { "module": "/assets/entry.client-CvDEkRgE.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasClientMiddleware": false, "hasErrorBoundary": true, "module": "/assets/root-ZxnSTEwG.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": ["/assets/root-D40sVkuK.css"], "clientActionModule": void 0, "clientLoaderModule": void 0, "clientMiddlewareModule": void 0, "hydrateFallbackModule": void 0 }, "routes/home": { "id": "routes/home", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasClientMiddleware": false, "hasErrorBoundary": false, "module": "/assets/home-ClIXZaso.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": [], "clientActionModule": void 0, "clientLoaderModule": void 0, "clientMiddlewareModule": void 0, "hydrateFallbackModule": void 0 } }, "url": "/assets/manifest-cbeb4c23.js", "version": "cbeb4c23", "sri": void 0 };
+async function loader() {
+  const res = await fetch("http://localhost:8000/api/v1/projects/");
+  if (!res.ok) return {
+    projects: []
+  };
+  const projects2 = await res.json();
+  return {
+    projects: projects2
+  };
+}
+const projects = UNSAFE_withComponentProps(function Projects() {
+  const {
+    projects: projects2
+  } = useLoaderData();
+  return /* @__PURE__ */ jsx("main", {
+    className: "min-h-screen py-12 px-6",
+    children: /* @__PURE__ */ jsxs("div", {
+      className: "max-w-4xl mx-auto",
+      children: [/* @__PURE__ */ jsx("h1", {
+        className: "text-3xl font-bold mb-8",
+        children: "Các dự án"
+      }), /* @__PURE__ */ jsx("div", {
+        className: "grid md:grid-cols-2 gap-6",
+        children: projects2?.map((p) => /* @__PURE__ */ jsxs("article", {
+          className: "border rounded-lg overflow-hidden",
+          children: [p.thumbnail && /* @__PURE__ */ jsx("img", {
+            src: p.thumbnail,
+            alt: p.title,
+            className: "w-full h-40 object-cover"
+          }), /* @__PURE__ */ jsxs("div", {
+            className: "p-4",
+            children: [/* @__PURE__ */ jsx("h2", {
+              className: "font-semibold text-lg",
+              children: p.title
+            }), /* @__PURE__ */ jsx("p", {
+              className: "text-sm text-gray-600 mt-2",
+              children: p.short_description
+            }), /* @__PURE__ */ jsxs("div", {
+              className: "mt-4 flex gap-2",
+              children: [p.demo_url && /* @__PURE__ */ jsx("a", {
+                href: p.demo_url,
+                className: "text-sm text-blue-600",
+                children: "Live ↗"
+              }), p.repo_url && /* @__PURE__ */ jsx("a", {
+                href: p.repo_url,
+                className: "text-sm text-blue-600",
+                children: "Repo ↗"
+              })]
+            })]
+          })]
+        }, p.id))
+      })]
+    })
+  });
+});
+const route2 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: projects,
+  loader
+}, Symbol.toStringTag, { value: "Module" }));
+const contact = UNSAFE_withComponentProps(function Contact() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState(null);
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("loading");
+    try {
+      await postContact({
+        name,
+        email,
+        message
+      });
+      setStatus("ok");
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch (err) {
+      setStatus("error");
+    }
+  }
+  return /* @__PURE__ */ jsx("main", {
+    className: "min-h-screen py-12 px-6",
+    children: /* @__PURE__ */ jsxs("div", {
+      className: "max-w-2xl mx-auto",
+      children: [/* @__PURE__ */ jsx("h1", {
+        className: "text-3xl font-bold mb-6",
+        children: "Liên hệ"
+      }), /* @__PURE__ */ jsxs("form", {
+        onSubmit: handleSubmit,
+        className: "space-y-4",
+        children: [/* @__PURE__ */ jsxs("div", {
+          children: [/* @__PURE__ */ jsx("label", {
+            className: "block text-sm font-medium",
+            children: "Tên"
+          }), /* @__PURE__ */ jsx("input", {
+            value: name,
+            onChange: (e) => setName(e.target.value),
+            className: "mt-1 block w-full border rounded px-3 py-2"
+          })]
+        }), /* @__PURE__ */ jsxs("div", {
+          children: [/* @__PURE__ */ jsx("label", {
+            className: "block text-sm font-medium",
+            children: "Email"
+          }), /* @__PURE__ */ jsx("input", {
+            value: email,
+            onChange: (e) => setEmail(e.target.value),
+            className: "mt-1 block w-full border rounded px-3 py-2"
+          })]
+        }), /* @__PURE__ */ jsxs("div", {
+          children: [/* @__PURE__ */ jsx("label", {
+            className: "block text-sm font-medium",
+            children: "Nội dung"
+          }), /* @__PURE__ */ jsx("textarea", {
+            value: message,
+            onChange: (e) => setMessage(e.target.value),
+            className: "mt-1 block w-full border rounded px-3 py-2",
+            rows: 6
+          })]
+        }), /* @__PURE__ */ jsx("div", {
+          children: /* @__PURE__ */ jsx("button", {
+            type: "submit",
+            className: "bg-black text-white px-4 py-2 rounded",
+            children: "Gửi"
+          })
+        }), status === "ok" && /* @__PURE__ */ jsx("p", {
+          className: "text-green-600",
+          children: "Gửi thành công."
+        }), status === "error" && /* @__PURE__ */ jsx("p", {
+          className: "text-red-600",
+          children: "Gửi thất bại, thử lại sau."
+        })]
+      })]
+    })
+  });
+});
+const route3 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: contact
+}, Symbol.toStringTag, { value: "Module" }));
+const serverManifest = { "entry": { "module": "/assets/entry.client-CvDEkRgE.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": [] }, "routes": { "root": { "id": "root", "parentId": void 0, "path": "", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasClientMiddleware": false, "hasErrorBoundary": true, "module": "/assets/root-CK6PM2Jj.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": ["/assets/root-pzKmqBSr.css"], "clientActionModule": void 0, "clientLoaderModule": void 0, "clientMiddlewareModule": void 0, "hydrateFallbackModule": void 0 }, "routes/home": { "id": "routes/home", "parentId": "root", "path": void 0, "index": true, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasClientMiddleware": false, "hasErrorBoundary": false, "module": "/assets/home-ClIXZaso.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": [], "clientActionModule": void 0, "clientLoaderModule": void 0, "clientMiddlewareModule": void 0, "hydrateFallbackModule": void 0 }, "routes/projects": { "id": "routes/projects", "parentId": "root", "path": "/projects", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": true, "hasClientAction": false, "hasClientLoader": false, "hasClientMiddleware": false, "hasErrorBoundary": false, "module": "/assets/projects-Cu68hJR9.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": [], "clientActionModule": void 0, "clientLoaderModule": void 0, "clientMiddlewareModule": void 0, "hydrateFallbackModule": void 0 }, "routes/contact": { "id": "routes/contact", "parentId": "root", "path": "/contact", "index": void 0, "caseSensitive": void 0, "hasAction": false, "hasLoader": false, "hasClientAction": false, "hasClientLoader": false, "hasClientMiddleware": false, "hasErrorBoundary": false, "module": "/assets/contact-D2nsEsC6.js", "imports": ["/assets/chunk-WWGJGFF6-BV3SjWWZ.js"], "css": [], "clientActionModule": void 0, "clientLoaderModule": void 0, "clientMiddlewareModule": void 0, "hydrateFallbackModule": void 0 } }, "url": "/assets/manifest-26330aeb.js", "version": "26330aeb", "sri": void 0 };
 const assetsBuildDirectory = "build\\client";
 const basename = "/";
 const future = { "unstable_optimizeDeps": false, "unstable_subResourceIntegrity": false, "v8_middleware": false, "v8_splitRouteModules": false, "v8_viteEnvironmentApi": false };
@@ -322,6 +473,22 @@ const routes = {
     index: true,
     caseSensitive: void 0,
     module: route1
+  },
+  "routes/projects": {
+    id: "routes/projects",
+    parentId: "root",
+    path: "/projects",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route2
+  },
+  "routes/contact": {
+    id: "routes/contact",
+    parentId: "root",
+    path: "/contact",
+    index: void 0,
+    caseSensitive: void 0,
+    module: route3
   }
 };
 export {
