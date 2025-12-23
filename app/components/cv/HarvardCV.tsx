@@ -5,7 +5,6 @@ export const HarvardCV = () => {
 
   return (
     <div className="harvard-cv hidden print:block bg-white text-black p-0 m-0 max-w-none w-full">
-      {/* 1. Header */}
       <div className="text-center border-b-2 border-black pb-4 mb-6">
         <h1 className="text-3xl font-serif font-bold uppercase tracking-wider mb-2">
           {data.profile.name}
@@ -21,12 +20,11 @@ export const HarvardCV = () => {
         </div>
       </div>
 
-      {/* 2. Education */}
       <section className="mb-6">
         <h2 className="text-lg font-serif font-bold uppercase border-b border-black mb-3">
           {data.labels.education}
         </h2>
-        {data.education.map((edu, i) => (
+        {data.education.map((edu: any, i: number) => (
           <div key={i} className="mb-2">
             <div className="flex justify-between font-serif">
               <span className="font-bold">{edu.school}</span>
@@ -34,14 +32,12 @@ export const HarvardCV = () => {
             </div>
             <div className="flex justify-between font-serif">
               <span>{edu.degree}</span>
-              {/* Nếu GPA tốt thì hiển thị, không thì thôi */}
               <span>GPA: {edu.gpa}</span> 
             </div>
           </div>
         ))}
       </section>
 
-      {/* 3. Technical Skills */}
       <section className="mb-6">
         <h2 className="text-lg font-serif font-bold uppercase border-b border-black mb-3">
           {data.labels.techStack}
@@ -53,12 +49,11 @@ export const HarvardCV = () => {
         </div>
       </section>
 
-      {/* 4. Experience */}
       <section className="mb-6">
         <h2 className="text-lg font-serif font-bold uppercase border-b border-black mb-3">
           {data.labels.experience}
         </h2>
-        {data.experience.map((exp, i) => (
+        {data.experience.map((exp: any, i: number) => (
           <div key={i} className="mb-4">
             <div className="flex justify-between font-serif mb-1">
               <span className="font-bold">{exp.company}</span>
@@ -66,19 +61,17 @@ export const HarvardCV = () => {
             </div>
             <div className="font-serif italic mb-1">{exp.role}</div>
             <ul className="list-disc ml-5 font-serif text-sm space-y-1">
-              {/* Giả sử description là một câu dài, ta có thể tách nếu cần, ở đây hiển thị trực tiếp */}
               <li>{exp.description}</li>
             </ul>
           </div>
         ))}
       </section>
 
-      {/* 5. Projects */}
       <section className="mb-6">
         <h2 className="text-lg font-serif font-bold uppercase border-b border-black mb-3">
           {data.labels.projects}
         </h2>
-        {data.projects.map((proj, i) => (
+        {data.projects.map((proj: any, i: number) => (
           <div key={i} className="mb-4">
              <div className="flex justify-between font-serif mb-1">
               <span className="font-bold">{proj.name}</span>

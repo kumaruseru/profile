@@ -184,10 +184,10 @@ export const portfolioData = {
   ...DATA_EN,
   skills: SKILLS_COMMON,
   github: {
-    username: "33nghia2001" 
+    username: "kumaruseru" 
   },
   social: {
-    github: "https://github.com/33nghia2001",
+    github: "https://github.com/kumaruseru",
     linkedin: "https://linkedin.com/in/nghiaht2810",
     facebook: "https://www.facebook.com/nghiaht28102003",
     twitter: "https://twitter.com/nghiaht281003"

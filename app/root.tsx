@@ -25,43 +25,39 @@ export const links = () => [
   { rel: "icon", href: "/favicon.ico" },
 ];
 
-// --- COMPONENT: SMOOTH SCROLL WRAPPER ---
-// Đã sửa lỗi Memory Leak ở đây
-function SmoothScroll({ children }) {
+function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       touchMultiplier: 2,
     });
 
-    let reqId; // Biến lưu ID của animation frame
+    let reqId: number;
 
-    function raf(time) {
+    function raf(time: number) {
       lenis.raf(time);
       reqId = requestAnimationFrame(raf);
     }
 
     reqId = requestAnimationFrame(raf);
 
-    // Cleanup function: Chạy khi component unmount
     return () => {
-      cancelAnimationFrame(reqId); // Hủy vòng lặp animation
-      lenis.destroy();             // Hủy instance Lenis
+      cancelAnimationFrame(reqId);
+      lenis.destroy();
     };
   }, []);
 
   return <>{children}</>;
 }
 
-// --- COMPONENT: SCROLL PROGRESS BAR ---
 function ProgressBar() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   });
 
   return (
@@ -72,7 +68,7 @@ function ProgressBar() {
   );
 }
 
-export function Layout({ children }) {
+export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
       <head>

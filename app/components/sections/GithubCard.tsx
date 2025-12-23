@@ -9,17 +9,14 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { portfolioData } from '../../data/portfolio';
 
 export const GithubCard = () => {
-  const { theme } = useTheme();
-  const { language } = useLanguage();
+  const { isDark } = useTheme();
+  const { lang } = useLanguage();
   
-  // State dữ liệu
-  const [profile, setProfile] = useState(null);
-  const [repos, setRepos] = useState([]);
+  const [profile, setProfile] = useState<any>(null);
+  const [repos, setRepos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // State riêng cho Calendar (Khởi tạo null để tránh lỗi render object)
-  const [CalendarComponent, setCalendarComponent] = useState(null);
+  const [error, setError] = useState<any>(null);
+  const [CalendarComponent, setCalendarComponent] = useState<any>(null);
 
   const username = portfolioData?.github?.username || 'nghiaht2810';
 
@@ -44,9 +41,8 @@ export const GithubCard = () => {
     }
   };
 
-  const t = texts[language] || texts.en;
+  const t = texts[lang] || texts.en;
 
-  // 1. Effect tải dữ liệu từ GitHub API
   useEffect(() => {
     const fetchGithubData = async () => {
       try {
@@ -62,7 +58,7 @@ export const GithubCard = () => {
         const reposData = await reposRes.json();
         
         setProfile(profileData);
-        setRepos(reposData.sort((a, b) => b.stargazers_count - a.stargazers_count).slice(0, 4));
+        setRepos(reposData.sort((a: any, b: any) => b.stargazers_count - a.stargazers_count).slice(0, 4));
       } catch (err) {
         console.error("Github Fetch Error:", err);
         setError(true);
@@ -74,29 +70,23 @@ export const GithubCard = () => {
     if (username) fetchGithubData();
   }, [username]);
 
-  // 2. Effect tải thư viện Calendar AN TOÀN (Fix lỗi Element type invalid)
   useEffect(() => {
     const loadCalendar = async () => {
         try {
             const mod = await import('react-github-calendar');
-            // Cố gắng lấy Component chuẩn: ưu tiên default, sau đó là named export
-            const Comp = mod.default || mod.GitHubCalendar;
-            
-            // Chỉ set state nếu Comp là function hoặc object component hợp lệ
-            // (Tránh set nhầm Module Namespace Object gây crash)
+            const Comp = (mod as any).default || (mod as any).GitHubCalendar;
             if (Comp) {
                 setCalendarComponent(() => Comp);
             }
         } catch (err) {
             console.warn("Failed to load GitHub Calendar library. Showing fallback.", err);
-            // Không làm gì cả, để UI tự hiện Skeleton
         }
     };
     loadCalendar();
   }, []);
 
-  const getLanguageColor = (lang) => {
-    const colors = {
+  const getLanguageColor = (lang: string) => {
+    const colors: Record<string,string> = {
       JavaScript: '#f7df1e', TypeScript: '#3178c6', HTML: '#e34c26', CSS: '#563d7c',
       Python: '#3572A5', Java: '#b07219', 'C#': '#178600', PHP: '#4F5D95',
       Vue: '#41b883', React: '#61dafb', Dart: '#00B4AB', Swift: '#ffac45', Go: '#00ADD8',
@@ -104,9 +94,9 @@ export const GithubCard = () => {
     return colors[lang] || '#8b949e';
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString?: string) => {
     if (!dateString) return "";
-    return new Intl.DateTimeFormat(language === 'vi' ? 'vi-VN' : 'en-US', { month: 'long', year: 'numeric' }).format(new Date(dateString));
+    return new Intl.DateTimeFormat(lang === 'vi' ? 'vi-VN' : 'en-US', { month: 'long', year: 'numeric' }).format(new Date(dateString));
   };
 
   const explicitTheme = {
@@ -114,7 +104,6 @@ export const GithubCard = () => {
     dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
   };
 
-  // --- LOADING UI ---
   if (loading) {
     return (
       <div className="col-span-1 md:col-span-2 flex flex-col items-center justify-center p-12 min-h-[400px] bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl animate-pulse">
@@ -124,7 +113,6 @@ export const GithubCard = () => {
     );
   }
 
-  // --- ERROR UI ---
   if (error || !profile) {
       return (
         <div className="col-span-1 md:col-span-2 p-8 text-center text-red-500 border border-red-100 rounded-2xl bg-white dark:bg-gray-900">
@@ -136,8 +124,6 @@ export const GithubCard = () => {
   return (
     <div className="col-span-1 md:col-span-2 group overflow-hidden border border-gray-200/60 dark:border-gray-800/60 bg-white dark:bg-[#0d1117] shadow-lg hover:shadow-xl transition-all duration-500 rounded-2xl">
       <div className="flex flex-col lg:flex-row h-full">
-        
-        {/* --- LEFT COLUMN --- */}
         <div className="w-full lg:w-[280px] shrink-0 bg-gradient-to-b from-gray-50/80 to-white dark:from-[#161b22] dark:to-[#0d1117] border-b lg:border-b-0 lg:border-r border-gray-200/60 dark:border-gray-800 p-6 flex flex-col relative z-10">
           <div className="flex flex-col items-center text-center mb-6">
             <div className="relative group/avatar mb-4">
@@ -212,10 +198,7 @@ export const GithubCard = () => {
           </a>
         </div>
 
-        {/* --- RIGHT COLUMN --- */}
         <div className="flex-1 flex flex-col bg-white dark:bg-[#0d1117] p-5 lg:p-6 overflow-hidden min-w-0">
-          
-          {/* === CONTRIBUTIONS GRAPH === */}
           <div className="mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">
@@ -225,11 +208,10 @@ export const GithubCard = () => {
             </div>
             
             <div className="flex justify-center lg:justify-start w-full overflow-x-auto scrollbar-thin py-2">
-                 {/* Chỉ render khi CalendarComponent đã tải xong, nếu không hiện Skeleton */}
                  {CalendarComponent ? (
                       <CalendarComponent 
                           username={username}
-                          colorScheme={theme === 'dark' ? 'dark' : 'light'}
+                          colorScheme={isDark ? 'dark' : 'light'}
                           theme={explicitTheme}
                           fontSize={11}
                           blockSize={11}
@@ -238,12 +220,11 @@ export const GithubCard = () => {
                               totalCount: '{{count}} contributions in the last year',
                           }}
                           style={{
-                              color: theme === 'dark' ? '#c9d1d9' : '#24292f',
+                              color: isDark ? '#c9d1d9' : '#24292f',
                               maxWidth: '100%'
                           }}
                       />
                  ) : (
-                    // Skeleton UI khi đang tải thư viện (Tránh lỗi object render)
                     <div className="h-[100px] w-full bg-gray-100 dark:bg-[#161b22] animate-pulse rounded-lg flex items-center justify-center border border-dashed border-gray-300 dark:border-gray-700">
                         <span className="text-xs text-gray-400 font-mono">Loading chart...</span>
                     </div>
@@ -251,7 +232,6 @@ export const GithubCard = () => {
             </div>
           </div>
 
-          {/* Repo List */}
           <div className="flex-grow flex flex-col min-w-0">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">

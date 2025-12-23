@@ -12,21 +12,15 @@ import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from "@re
 import { useRef, useMemo } from "react";
 import * as THREE from "three";
 
-/**
- * --- 1. STAR TUNNEL: WARP SPEED ---
- */
 function StarTunnel() {
   const count = 4000; 
-  const points = useRef();
+  const points = useRef<any>();
 
-  // Tạo mảng vị trí sao
   const particlesPosition = useMemo(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      // X, Y: Rải rất rộng để bao phủ toàn bộ khung nhìn
       positions[i * 3] = (Math.random() - 0.5) * 300; 
       positions[i * 3 + 1] = (Math.random() - 0.5) * 300; 
-      // Z: Rải dọc theo đường hầm từ xa (-300) đến gần (50)
       positions[i * 3 + 2] = (Math.random() - 0.5) * 400; 
     }
     return positions;
@@ -35,28 +29,18 @@ function StarTunnel() {
   useFrame((state, delta) => {
     if (points.current) {
       const positions = points.current.geometry.attributes.position.array;
-      // Tốc độ bay (điều chỉnh số này để thay đổi cảm giác tốc độ)
       const speed = 200 * delta; 
 
       for (let i = 0; i < count; i++) {
         const i3 = i * 3;
-        
-        // Di chuyển sao về phía camera (trục Z tăng)
         positions[i3 + 2] += speed;
-
-        // Nếu sao bay qua mặt camera (Z > 50), reset nó về phía xa (-350)
         if (positions[i3 + 2] > 50) {
           positions[i3 + 2] = -350; 
-          // Random lại vị trí X, Y để sao không bị lặp lại pattern cũ
           positions[i3] = (Math.random() - 0.5) * 300;
           positions[i3 + 1] = (Math.random() - 0.5) * 300;
         }
       }
-      
-      // Bắt buộc Three.js cập nhật lại vị trí các điểm
       points.current.geometry.attributes.position.needsUpdate = true;
-      
-      // Xoay nhẹ đường hầm tạo cảm giác xoắn ốc
       points.current.rotation.z += delta * 0.1; 
     }
   });
@@ -71,9 +55,8 @@ function StarTunnel() {
           array={particlesPosition}
         />
       </bufferGeometry>
-      {/* Material sao: Màu trắng, không trong suốt để sáng rõ nhất */}
       <pointsMaterial 
-        size={2.0}          // Kích thước lớn để dễ nhìn
+        size={2.0}
         color="white" 
         transparent={false}
         opacity={1} 
@@ -84,12 +67,8 @@ function StarTunnel() {
   );
 }
 
-/**
- * --- 2. BLACK HOLE ---
- */
 function BlackHole() {
-  const diskRef = useRef();
-  
+  const diskRef = useRef<any>();
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (diskRef.current) {
@@ -100,11 +79,9 @@ function BlackHole() {
 
   return (
     <group position={[0, 0, -30]} scale={4}>
-      {/* Event Horizon */}
       <Sphere args={[1.5, 64, 64]}>
         <meshBasicMaterial color="#000000" />
       </Sphere>
-      {/* Accretion Disk */}
       <Torus ref={diskRef} args={[3.5, 0.6, 64, 100]} rotation={[1.2, 0, 0]}>
         <MeshDistortMaterial 
           color="#f97316" 
@@ -116,7 +93,6 @@ function BlackHole() {
           speed={5} 
         />
       </Torus>
-      {/* Halo */}
       <Sphere args={[4.5, 32, 32]} position={[0, 0, 0]}>
          <meshBasicMaterial 
             color="#ea580c" 
@@ -131,17 +107,13 @@ function BlackHole() {
   );
 }
 
-/**
- * --- 3. PLAYER SHIP ---
- */
 function PlayerShip() {
-  const groupRef = useRef();
-  const flameRef = useRef();
+  const groupRef = useRef<any>();
+  const flameRef = useRef<any>();
   const { viewport, mouse } = useThree();
 
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
-    // Logic di chuyển theo chuột
     const x = (mouse.x * viewport.width) / 2.5;
     const y = (mouse.y * viewport.height) / 2.5;
 
@@ -151,7 +123,6 @@ function PlayerShip() {
       groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, -mouse.x * 0.5, 0.1);
       groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, -mouse.y * 0.2, 0.1);
     }
-    // Hiệu ứng lửa động cơ
     if (flameRef.current) {
        flameRef.current.scale.y = 1 + Math.sin(t * 30) * 0.3 + (Math.abs(mouse.x) + Math.abs(mouse.y)) * 0.5;
        flameRef.current.material.opacity = 0.8 + Math.sin(t * 50) * 0.2;
@@ -161,7 +132,7 @@ function PlayerShip() {
   return (
     <group ref={groupRef} position={[0, -2, 0]}> 
       <group rotation={[0, Math.PI, 0]} scale={0.6}>
-        <Trail width={1.8} length={8} color="#3b82f6" attenuation={(t) => t * t}>
+        <Trail width={1.8} length={8} color="#3b82f6" attenuation={(t: number) => t * t}>
             <mesh position={[0, 0.5, 0]}>
                 <cylinderGeometry args={[0.3, 0.6, 2, 6]} />
                 <meshStandardMaterial color="#cbd5e1" roughness={0.3} metalness={0.8} />
@@ -198,9 +169,6 @@ function PlayerShip() {
   );
 }
 
-/**
- * --- 4. GAME HUD ---
- */
 function GameHUD() {
     return (
         <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-8 z-10 text-cyan-400 font-mono tracking-widest select-none">
@@ -214,11 +182,9 @@ function GameHUD() {
                     <p className="text-xs">WARP SPEED: ACTIVE</p>
                 </div>
             </div>
-            {/* Crosshair */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border border-cyan-500/30 rounded-full flex items-center justify-center">
                  <div className="w-1 h-1 bg-cyan-400 rounded-full"></div>
             </div>
-            {/* Bottom Info */}
             <div className="flex justify-between items-end opacity-80">
                 <div>
                      <div className="flex gap-2 mb-2">
@@ -237,13 +203,8 @@ function GameHUD() {
     )
 }
 
-/**
- * --- MAIN SCENE ---
- */
 export default function SpaceScene() {
   return (
-    // FIX: Sử dụng "absolute inset-0" thay vì "relative"
-    // Điều này đảm bảo Canvas chiếm toàn bộ màn hình background của ErrorBoundary
     <div className="absolute inset-0 w-full h-full bg-black overflow-hidden z-0">
       <GameHUD />
 
@@ -256,7 +217,6 @@ export default function SpaceScene() {
 
         <Environment preset="city" />
         
-        {/* Render Scene */}
         <StarTunnel />
         <BlackHole />
         <PlayerShip />
@@ -267,17 +227,13 @@ export default function SpaceScene() {
             intensity={1} 
         />
 
-        {/* Post Processing */}
-        <EffectComposer disableNormalPass multisampling={0}>
-            <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.5} radius={0.5} />
-            <ChromaticAberration offset={[0.005, 0.005]} />
-            <Noise opacity={0.15} />
-            <Vignette eskil={false} offset={0.1} darkness={1.1} />
+        <EffectComposer enableNormalPass={false} multisampling={0}>
+          <Bloom luminanceThreshold={0.2} mipmapBlur intensity={1.5} radius={0.5} />
+          <ChromaticAberration offset={new THREE.Vector2(0.005, 0.005)} radialModulation={false} modulationOffset={new THREE.Vector2(0, 0)} />
+          <Noise opacity={0.15} />
+          <Vignette eskil={false} offset={0.1} darkness={1.1} />
         </EffectComposer>
-
-        {/* FIX: Tạm thời tắt Fog hoặc đẩy nó ra rất xa để không che mất sao */}
-        {/* <fog attach="fog" args={['#000000', 30, 120]} /> */}
-        
+      
       </Canvas>
     </div>
   );
