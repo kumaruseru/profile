@@ -4,50 +4,57 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 
-# === IMPORT VIEWS TỪ CÁC APP ===
-# 1. Info Apps
+# === 1. IMPORT VIEWS TỪ CÁC APP ===
+# Apps: Personal, Resume, Projects, Blog, Contact, Core
 from apps.info.personal.views import UserProfileDetailView
 from apps.info.resume.views import ResumeViewSet
-
-# 2. Showcase Apps
 from apps.showcase.projects.views import ProjectViewSet
 from apps.showcase.blog.views import PostViewSet
-
-# 3. System Apps
 from apps.system.contact.views import ContactCreateView
-from apps.system.core.views import SiteConfigurationView
+from apps.system.core.views import SiteConfigurationView, portfolio_home_api
 
-# === ROUTER CONFIGURATION ===
-# Dùng cho các ViewSet (Cung cấp list, detail, pagination tự động)
+# === 2. ROUTER CONFIGURATION (Tự động tạo URL CRUD) ===
 router = DefaultRouter()
-router.register(r'resume', ResumeViewSet, basename='resume')
-router.register(r'projects', ProjectViewSet, basename='projects')
-router.register(r'blog', PostViewSet, basename='blog')
 
-# === API URL PATTERNS ===
+# URL: /api/resume/
+router.register(r'resume', ResumeViewSet, basename='resume')
+
+# URL: /api/projects/
+router.register(r'projects', ProjectViewSet, basename='projects')
+
+# URL: /api/blog/posts/ 
+# Lưu ý: Frontend đang gọi /blog/posts/ nên ta register đường dẫn này
+router.register(r'blog/posts', PostViewSet, basename='blog-posts')
+
+# === 3. API URL PATTERNS ===
 api_urlpatterns = [
-    # A. Singleton Resources (Chỉ có 1 bản ghi duy nhất)
-    path('profile/', UserProfileDetailView.as_view(), name='profile-detail'),
-    path('config/', SiteConfigurationView.as_view(), name='site-config'),
+    # --- Custom Endpoints (API Tổng hợp & Đơn lẻ) ---
     
-    # B. Action Resources (Chức năng cụ thể)
+    # 1. API Tổng hợp cho Home Page (Quan trọng: Fix lỗi 404 trang chủ)
+    path('portfolio/home/', portfolio_home_api, name='portfolio-home'),
+
+    # 2. Các API Config & Profile (Singleton)
+    path('config/', SiteConfigurationView.as_view(), name='site-config'),
+    path('profile/', UserProfileDetailView.as_view(), name='profile-detail'),
+    
+    # 3. API Gửi form liên hệ
     path('contact/', ContactCreateView.as_view(), name='contact-create'),
 
-    # C. Collection Resources (Gộp các ViewSet từ Router)
+    # --- Router Includes ---
+    # Bao gồm các URL từ router (resume, projects, blog)
     path('', include(router.urls)),
 ]
 
-# === MAIN URL CONFIGURATION ===
+# === 4. MAIN URL CONFIGURATION ===
 urlpatterns = [
-    # Trang quản trị Django Admin
-    path('nghia/', admin.site.urls),
+    path('admin/', admin.site.urls),
     
-    # Gom nhóm API dưới prefix /api/v1/
-    path('api/v1/', include(api_urlpatterns)),
+    # Prefix 'api/' cho toàn bộ endpoints
+    # Ví dụ kết quả: http://localhost:8000/api/portfolio/home/
+    path('api/', include(api_urlpatterns)),
 ]
 
-# === STATIC/MEDIA SERVING (DEV MODE) ===
-# Chỉ chạy khi DEBUG=True và KHÔNG dùng S3 (Lưu trên ổ cứng local)
-if settings.DEBUG and not settings.USE_S3:
+# === 5. STATIC & MEDIA FILES (Chỉ chạy ở chế độ DEBUG) ===
+if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
